@@ -4,6 +4,6 @@ public interface MessageHandler {
 
 	short getId();
 	
-	void onReceive(MessageEvent event);
+	void onMessage(MessageEvent event);
 	
 }

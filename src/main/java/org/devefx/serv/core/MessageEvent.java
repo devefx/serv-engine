@@ -1,5 +1,8 @@
 package org.devefx.serv.core;
 
-public class MessageEvent {
-
+public interface MessageEvent {
+	
+	short getId();
+	
+	
 }

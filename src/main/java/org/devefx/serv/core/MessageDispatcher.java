@@ -3,7 +3,6 @@ package org.devefx.serv.core;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-
 public class MessageDispatcher extends Thread {
 
 	private Queue<MessageEvent> msgQueue = new ConcurrentLinkedDeque<MessageEvent>();
@@ -32,7 +31,7 @@ public class MessageDispatcher extends Thread {
 				}
 				MessageEvent msg = null;
 				while ((msg = msgQueue.poll()) != null) {
-					System.out.println("处理消息：" + msg);
+					System.out.println("处理消息：" + msg + msg.getId());
 				}
 			}
 		}

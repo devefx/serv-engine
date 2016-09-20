@@ -37,7 +37,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 			SocketAddress address = channel.remoteAddress();
 			System.out.println("[TCP]这个人发来了一条消息：" + address);
 		}
-		dispatcher.push(new MessageEvent());
+		dispatcher.push(new MessageEvent() {
+			@Override
+			public short getId() {
+				return 0;
+			}
+		});
 	}
 	
 	@Override

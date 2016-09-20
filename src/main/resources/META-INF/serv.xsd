@@ -4,13 +4,14 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	targetNamespace="http://code.devefx.org/schema/serv">
 	
-	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
-	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 	
 	<xsd:complexType name="tcpType">
 		<xsd:attribute name="name" type="xsd:string" use="optional"/>
 		<xsd:attribute name="port" type="xsd:int" use="optional"/>
 		<xsd:attribute name="host" type="xsd:string" use="optional"/>
+		<xsd:attribute name="handler" type="xsd:IDREF" use="required"/>
 	</xsd:complexType>
 	
 	<xsd:complexType name="udpType">
@@ -19,9 +20,21 @@
 		<xsd:attribute name="host" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 	
-	<xsd:element name="handler-scan">
+	<xsd:element name="handler">
 		<xsd:complexType>
-			<xsd:attribute name="base-package" type="xsd:string" use="required"/>
+			<xsd:attribute name="class" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="handlers">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="handler"/>
+				</xsd:choice>		
+			</xsd:sequence>
+			<xsd:attribute name="id" type="xsd:ID" use="required"/>
+			<xsd:attribute name="scan-package" type="xsd:string" use="optional"/>
 		</xsd:complexType>
 	</xsd:element>
 	
