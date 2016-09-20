@@ -3,6 +3,7 @@ package org.devefx.serv.net;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import org.devefx.serv.config.HandlerRegistry;
 import org.devefx.serv.core.MessageDispatcher;
 import org.devefx.serv.core.MessageEvent;
 import org.slf4j.Logger;
@@ -19,8 +20,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 	
 	private MessageDispatcher dispatcher;
 	
-	public ServerHandler() {
-		dispatcher = new MessageDispatcher();
+	public ServerHandler(HandlerRegistry registry) {
+		dispatcher = new MessageDispatcher(registry);
 		dispatcher.start();
 	}
 	

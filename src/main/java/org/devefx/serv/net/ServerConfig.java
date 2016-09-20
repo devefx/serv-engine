@@ -1,4 +1,6 @@
-package org.devefx.serv.config;
+package org.devefx.serv.net;
+
+import org.devefx.serv.config.HandlerRegistry;
 
 import java.io.Serializable;
 
@@ -8,6 +10,7 @@ public abstract class ServerConfig implements Serializable {
 	
 	protected String host = "0.0.0.0";
 	protected int port = 9999;
+	protected HandlerRegistry registry;
 	
 	public String getHost() {
 		return host;
@@ -23,5 +26,13 @@ public abstract class ServerConfig implements Serializable {
 	
 	public int getPort() {
 		return port;
+	}
+
+	public HandlerRegistry getRegistry() {
+		return registry;
+	}
+
+	public void setRegistry(HandlerRegistry registry) {
+		this.registry = registry;
 	}
 }

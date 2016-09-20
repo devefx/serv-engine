@@ -7,17 +7,11 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 	
-	<xsd:complexType name="tcpType">
+	<xsd:complexType name="serverType">
 		<xsd:attribute name="name" type="xsd:string" use="optional"/>
 		<xsd:attribute name="port" type="xsd:int" use="optional"/>
 		<xsd:attribute name="host" type="xsd:string" use="optional"/>
-		<xsd:attribute name="handler" type="xsd:IDREF" use="required"/>
-	</xsd:complexType>
-	
-	<xsd:complexType name="udpType">
-		<xsd:attribute name="name" type="xsd:string" use="optional"/>
-		<xsd:attribute name="port" type="xsd:int" use="optional"/>
-		<xsd:attribute name="host" type="xsd:string" use="optional"/>
+		<xsd:attribute name="registry" type="xsd:IDREF" use="required"/>
 	</xsd:complexType>
 	
 	<xsd:element name="handler">
@@ -26,7 +20,7 @@
 		</xsd:complexType>
 	</xsd:element>
 	
-	<xsd:element name="handlers">
+	<xsd:element name="registry">
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:choice minOccurs="0" maxOccurs="unbounded">
@@ -38,13 +32,13 @@
 		</xsd:complexType>
 	</xsd:element>
 	
-	<xsd:element name="tcp" type="tcpType">
+	<xsd:element name="tcp" type="serverType">
 		<xsd:annotation> 
 			<xsd:documentation><![CDATA[ The tcp config ]]></xsd:documentation> 
 		</xsd:annotation>
 	</xsd:element>
 	
-	<xsd:element name="udp" type="udpType">
+	<xsd:element name="udp" type="serverType">
 		<xsd:annotation> 
 			<xsd:documentation><![CDATA[ The udp config ]]></xsd:documentation> 
 		</xsd:annotation>

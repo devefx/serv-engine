@@ -7,13 +7,13 @@
         http://code.devefx.org/schema/serv
         http://code.devefx.org/schema/serv/serv.xsd">
 	
-	<serv:handlers id="handerList" scan-package="org.devefx.handler">
+	<serv:registry id="registry" scan-package="org.devefx.handler">
 		<serv:handler class="org.devefx.handler.LoginHandler"/>
 		<serv:handler class="org.devefx.handler.MoveHandler"/>
-	</serv:handlers>
+	</serv:registry>
+
+	<serv:tcp name="tcp-server" port="6666" registry="registry"/>
 	
-	<serv:tcp name="tcp-server" port="6666" handler="handerList"/>
-	
-    <serv:udp name="udp-server" port="7777"/>
+    <serv:udp name="udp-server" port="7777" registry="registry"/>
 	
 </beans>

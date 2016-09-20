@@ -15,7 +15,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-import org.devefx.serv.config.ServerConfig;
+import org.devefx.serv.net.ServerConfig;
 import org.devefx.serv.net.ServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +74,7 @@ public class TcpServer extends ServerConfig implements InitializingBean {
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
 			ChannelPipeline pipeline = ch.pipeline();
-			pipeline.addLast(new ServerHandler());
+			pipeline.addLast(new ServerHandler(getRegistry()));
 		}
 	}
 }

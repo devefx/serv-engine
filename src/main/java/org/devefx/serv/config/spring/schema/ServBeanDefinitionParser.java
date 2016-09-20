@@ -2,16 +2,27 @@ package org.devefx.serv.config.spring.schema;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Date;
+import java.util.*;
 
+import org.devefx.serv.config.HandlerRegistry;
+import org.devefx.serv.core.MessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class ServBeanDefinitionParser implements BeanDefinitionParser {
+
+	private static final Logger log = LoggerFactory.getLogger(ServBeanDefinitionParser.class);
 
 	private final Class<?> beanClass;
 	
@@ -44,6 +55,33 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 				throw new IllegalStateException("Duplicate spring bean id " + id);
 			}
 			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
+		}
+
+		if (beanClass.isAssignableFrom(HandlerRegistry.class)) {
+			HandlerRegistry registry = new HandlerRegistry();
+			String scanPackage = element.getAttribute("scan-package");
+			if (scanPackage != null && !scanPackage.isEmpty()) {
+				handlerScan(registry, scanPackage);
+			}
+			NodeList nodes = element.getChildNodes();
+			for (int i = 0; i < nodes.getLength(); i++) {
+				Node node = nodes.item(i);
+				if (Node.ELEMENT_NODE == node.getNodeType()) {
+					String className = ((Element) node).getAttribute("class");
+					try {
+						Class<?> handlerClass = Class.forName(className);
+						if (!handlerClass.isAssignableFrom(MessageHandler.class)) {
+							// throw exception
+						}
+						MessageHandler handler = (MessageHandler) handlerClass.newInstance();
+						registry.registerHandler(handler.getId(), handler);
+					} catch (Exception e) {
+						log.error("An error occurred:", e);
+						e.printStackTrace();
+					}
+				}
+			}
+			beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(registry);
 		}
 		
 		for (Method setter : beanClass.getMethods()) {
@@ -83,5 +121,9 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
                 || cls == Long.class || cls == Float.class || cls == Double.class
                 || cls == String.class || cls == Date.class || cls == Class.class;
     }
+
+	private static void handlerScan(HandlerRegistry registry, String packageName) {
+
+	}
 
 }

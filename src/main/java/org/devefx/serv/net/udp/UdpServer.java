@@ -10,7 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
-import org.devefx.serv.config.ServerConfig;
+import org.devefx.serv.net.ServerConfig;
 import org.devefx.serv.net.ServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class UdpServer extends ServerConfig implements InitializingBean {
 			b.group(group)
 			 .channel(NioDatagramChannel.class)
 			 .option(ChannelOption.SO_BROADCAST, true)
-			 .handler(new ServerHandler());
+			 .handler(new ServerHandler(getRegistry()));
 			
 			b.bind(host, port).addListener(new ChannelFutureListener() {
 				@Override
