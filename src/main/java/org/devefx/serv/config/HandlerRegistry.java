@@ -3,9 +3,7 @@ package org.devefx.serv.config;
 import org.devefx.serv.core.MessageHandler;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HandlerRegistry implements Serializable {
