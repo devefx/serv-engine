@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://code.devefx.org/schema/serv"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	targetNamespace="http://code.devefx.org/schema/serv">
+	
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	
+	<xsd:complexType name="tcpType">
+		<xsd:attribute name="name" type="xsd:string" use="optional"/>
+		<xsd:attribute name="port" type="xsd:int" use="optional"/>
+		<xsd:attribute name="host" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="udpType">
+		<xsd:attribute name="name" type="xsd:string" use="optional"/>
+		<xsd:attribute name="port" type="xsd:int" use="optional"/>
+		<xsd:attribute name="host" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:element name="handler-scan">
+		<xsd:complexType>
+			<xsd:attribute name="base-package" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="tcp" type="tcpType">
+		<xsd:annotation> 
+			<xsd:documentation><![CDATA[ The tcp config ]]></xsd:documentation> 
+		</xsd:annotation>
+	</xsd:element>
+	
+	<xsd:element name="udp" type="udpType">
+		<xsd:annotation> 
+			<xsd:documentation><![CDATA[ The udp config ]]></xsd:documentation> 
+		</xsd:annotation>
+	</xsd:element>
+	
+</xsd:schema>
