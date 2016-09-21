@@ -57,7 +57,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		log.error("An error occurred:", cause);
 		ctx.close();
 	}
 }
