@@ -52,6 +52,7 @@ public class MessageDispatcher extends Thread {
 							log.info(String.format("[id: %d] UNREGISTERED", msg.getId()));
 						}
 					}
+					msg.getContent().release();
 				}
 			}
 		}

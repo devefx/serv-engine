@@ -1,6 +1,7 @@
 package org.devefx.serv.net.tcp;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
@@ -37,7 +38,7 @@ public class TcpSender implements Sender {
 	
 	@Override
 	public void writeAndFlush(byte[] bytes) {
-		channel.writeAndFlush(bytes);
+		writeAndFlush(Unpooled.copiedBuffer(bytes));
 	}
 	
 	@Override

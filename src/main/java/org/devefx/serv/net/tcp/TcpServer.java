@@ -13,6 +13,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -75,7 +76,11 @@ public class TcpServer extends ServerConfig implements InitializingBean {
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
 			ChannelPipeline pipeline = ch.pipeline();
+			// decoder
 			pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 0, 2));
+			// encoder
+			pipeline.addLast(new LengthFieldPrepender(2));
+			// business
 			pipeline.addLast(new ServerHandler(getRegistry(), getIdentifier()));
 		}
 	}

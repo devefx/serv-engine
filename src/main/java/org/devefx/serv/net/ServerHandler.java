@@ -35,25 +35,29 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 			DatagramPacket packet = (DatagramPacket) msg;
 			ByteBuf buf = (ByteBuf) packet.content();
 			Object msgId = identifier.checkId(buf);
-			buf.retain();
 			
 			Sender sender = new UdpSender(ctx.channel(), packet.sender());
-			MessageEvent event = new MessageEvent(msgId, buf, sender);
+			MessageEvent event = new MessageEvent(msgId, sender, buf);
 			dispatcher.push(event);
 		} else {
 			ByteBuf buf = (ByteBuf) msg;
 			Object msgId = identifier.checkId(buf);
-			buf.retain();
 			
 			Sender sender = new TcpSender(ctx.channel());
-			MessageEvent event = new MessageEvent(msgId, buf, sender);
+			MessageEvent event = new MessageEvent(msgId, sender, buf);
 			dispatcher.push(event);
 		}
+	}
+	
+	@Override
+	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+		ctx.flush();
 	}
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
 		log.error("An error occurred:", cause);
+		ctx.close();
 	}
 }

@@ -7,24 +7,25 @@ import io.netty.buffer.ByteBuf;
 public class MessageEvent {
 	
 	private final Object id;
-	private final ByteBuf content;
 	private final Sender sender;
+	private final ByteBuf content;
 	
-	public MessageEvent(Object id, ByteBuf content, Sender sender) {
+	public MessageEvent(Object id, Sender sender, ByteBuf content) {
 		this.id = id;
-		this.content = content;
 		this.sender = sender;
+		this.content = content;
+		this.content.retain();
 	}
 	
 	public Object getId() {
 		return id;
 	}
 	
-	public ByteBuf getContent() {
-		return content;
-	}
-	
 	public Sender getSender() {
 		return sender;
+	}
+	
+	public ByteBuf getContent() {
+		return content;
 	}
 }
