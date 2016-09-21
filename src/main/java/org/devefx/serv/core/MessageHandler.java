@@ -1,9 +1,13 @@
 package org.devefx.serv.core;
 
-public interface MessageHandler {
+import org.devefx.serv.net.Sender;
 
-	short getId();
+import io.netty.buffer.ByteBuf;
+
+public interface MessageHandler<T> {
+
+	T getId();
 	
-	void onMessage(MessageEvent event);
+	void onMessage(Sender sender, ByteBuf msg);
 	
 }

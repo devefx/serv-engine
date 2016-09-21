@@ -1,15 +1,15 @@
 package org.devefx.serv.net;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
+import org.devefx.serv.config.HandlerIdentifier;
 import org.devefx.serv.config.HandlerRegistry;
 import org.devefx.serv.core.MessageDispatcher;
 import org.devefx.serv.core.MessageEvent;
+import org.devefx.serv.net.tcp.TcpSender;
+import org.devefx.serv.net.udp.UdpSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
@@ -20,30 +20,35 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 	
 	private MessageDispatcher dispatcher;
 	
-	public ServerHandler(HandlerRegistry registry) {
+	private HandlerIdentifier identifier;
+	
+	public ServerHandler(HandlerRegistry registry, HandlerIdentifier identifier) {
 		dispatcher = new MessageDispatcher(registry);
 		dispatcher.start();
+		this.identifier = identifier;
 	}
 	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
-		
 		if (msg instanceof DatagramPacket) {
 			DatagramPacket packet = (DatagramPacket) msg;
-			InetSocketAddress address = packet.sender();
-			System.out.println("[UDP]这个人发来了一条消息：" + address);
+			ByteBuf buf = (ByteBuf) packet.content();
+			Object msgId = identifier.checkId(buf);
+			buf.retain();
+			
+			Sender sender = new UdpSender(ctx.channel(), packet.sender());
+			MessageEvent event = new MessageEvent(msgId, buf, sender);
+			dispatcher.push(event);
 		} else {
-			Channel channel = ctx.channel();
-			SocketAddress address = channel.remoteAddress();
-			System.out.println("[TCP]这个人发来了一条消息：" + address);
+			ByteBuf buf = (ByteBuf) msg;
+			Object msgId = identifier.checkId(buf);
+			buf.retain();
+			
+			Sender sender = new TcpSender(ctx.channel());
+			MessageEvent event = new MessageEvent(msgId, buf, sender);
+			dispatcher.push(event);
 		}
-		dispatcher.push(new MessageEvent() {
-			@Override
-			public short getId() {
-				return 0;
-			}
-		});
 	}
 	
 	@Override

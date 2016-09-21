@@ -4,7 +4,9 @@ import org.springframework.core.NestedRuntimeException;
 
 public class HandlerStoreException extends NestedRuntimeException {
 
-    public HandlerStoreException(String msg) {
+	private static final long serialVersionUID = -7111268437493869239L;
+
+	public HandlerStoreException(String msg) {
         super(msg);
     }
 

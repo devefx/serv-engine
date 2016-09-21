@@ -12,6 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -44,7 +45,7 @@ public class TcpServer extends ServerConfig implements InitializingBean {
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
 						if (log.isInfoEnabled()) {
-							log.info("tcp server start successfully, port:" + port);
+							log.info("tcp server start successfully, bind: /" + host + ":" + port);
 						}
 					} else {
 						throw new IOException(future.cause());
@@ -74,7 +75,8 @@ public class TcpServer extends ServerConfig implements InitializingBean {
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
 			ChannelPipeline pipeline = ch.pipeline();
-			pipeline.addLast(new ServerHandler(getRegistry()));
+			pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 0, 2));
+			pipeline.addLast(new ServerHandler(getRegistry(), getIdentifier()));
 		}
 	}
 }

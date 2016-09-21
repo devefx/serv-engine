@@ -30,14 +30,14 @@ public class UdpServer extends ServerConfig implements InitializingBean {
 			b.group(group)
 			 .channel(NioDatagramChannel.class)
 			 .option(ChannelOption.SO_BROADCAST, true)
-			 .handler(new ServerHandler(getRegistry()));
+			 .handler(new ServerHandler(getRegistry(), this.getIdentifier()));
 			
 			b.bind(host, port).addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
 						if (log.isInfoEnabled()) {
-							log.info("udp server start successfully, port:" + port);
+							log.info("udp server start successfully, bind: /" + host + ":" + port);
 						}
 					} else {
 						throw new IOException(future.cause());

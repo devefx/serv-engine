@@ -12,6 +12,7 @@
 		<xsd:attribute name="port" type="xsd:int" use="optional"/>
 		<xsd:attribute name="host" type="xsd:string" use="optional"/>
 		<xsd:attribute name="registry" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="identifier" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 	
 	<xsd:element name="handler">
@@ -32,10 +33,17 @@
 		</xsd:complexType>
 	</xsd:element>
 	
-	<xsd:element name="tcp" type="serverType">
+	<xsd:element name="tcp">
 		<xsd:annotation> 
 			<xsd:documentation><![CDATA[ The tcp config ]]></xsd:documentation> 
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="serverType">
+					<xsd:attribute name="codec" type="xsd:string" use="optional"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 	
 	<xsd:element name="udp" type="serverType">

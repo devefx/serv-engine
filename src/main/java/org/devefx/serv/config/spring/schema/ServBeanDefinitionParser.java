@@ -8,14 +8,19 @@ import org.devefx.serv.config.HandlerRegistry;
 import org.devefx.serv.core.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,6 +29,8 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final Logger log = LoggerFactory.getLogger(ServBeanDefinitionParser.class);
 
+	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+	
 	private final Class<?> beanClass;
 	
 	private final boolean required;
@@ -61,24 +68,14 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 			HandlerRegistry registry = new HandlerRegistry();
 			String scanPackage = element.getAttribute("scan-package");
 			if (scanPackage != null && !scanPackage.isEmpty()) {
-				handlerScan(registry, scanPackage);
+				scanHandler(registry, scanPackage);
 			}
 			NodeList nodes = element.getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
 				if (Node.ELEMENT_NODE == node.getNodeType()) {
 					String className = ((Element) node).getAttribute("class");
-					try {
-						Class<?> handlerClass = Class.forName(className);
-						if (!handlerClass.isAssignableFrom(MessageHandler.class)) {
-							// throw exception
-						}
-						MessageHandler handler = (MessageHandler) handlerClass.newInstance();
-						registry.registerHandler(handler.getId(), handler);
-					} catch (Exception e) {
-						log.error("An error occurred:", e);
-						e.printStackTrace();
-					}
+					registerHandler(registry, className);
 				}
 			}
 			beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(registry);
@@ -122,8 +119,39 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
                 || cls == String.class || cls == Date.class || cls == Class.class;
     }
 
-	private static void handlerScan(HandlerRegistry registry, String packageName) {
-
+	private static void scanHandler(HandlerRegistry registry, String packageName) {
+		String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + 
+				ClassUtils.convertClassNameToResourcePath(packageName) + "/" + DEFAULT_RESOURCE_PATTERN;
+		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);
+		try {
+			Resource[] resources = resolver.getResources(packageSearchPath);
+			for (Resource resource: resources) {
+				if (resource.isReadable()) {
+					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+					AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+					registerHandler(registry, metadata.getClassName());
+				}
+			}
+		} catch (Exception e) {
+			log.error("An error occurred:", e);
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private static void registerHandler(HandlerRegistry registry, String className) {
+		try {
+			Class<?> handlerClass = Class.forName(className);
+			if (!handlerClass.isAssignableFrom(MessageHandler.class)) {
+				// throw exception
+			}
+			MessageHandler handler = (MessageHandler) handlerClass.newInstance();
+			registry.registerHandler(handler.getId(), handler);
+		} catch (Exception e) {
+			log.error("An error occurred:", e);
+			e.printStackTrace();
+		}
 	}
 
 }

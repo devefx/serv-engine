@@ -1,18 +1,28 @@
 package org.devefx.handler;
 
-import org.devefx.serv.core.MessageEvent;
-import org.devefx.serv.core.MessageHandler;
+import io.netty.buffer.ByteBuf;
 
-public class MoveHandler implements MessageHandler {
+import org.devefx.serv.core.MessageHandler;
+import org.devefx.serv.net.Sender;
+
+public class MoveHandler implements MessageHandler<Short> {
 
 	@Override
-	public short getId() {
+	public Short getId() {
 		return 1;
 	}
 
 	@Override
-	public void onMessage(MessageEvent event) {
+	public void onMessage(Sender sender, ByteBuf buf) {
 		
+		byte[] bytes = new byte[buf.readableBytes()];
+		buf.readBytes(bytes);
+		System.out.println(new String(bytes));
+		
+		if (sender.isWritable()) {
+			String string = "hello register";
+			sender.writeAndFlush(string.getBytes());
+		}
 	}
 	
 }

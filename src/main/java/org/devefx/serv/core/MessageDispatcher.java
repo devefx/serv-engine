@@ -1,13 +1,17 @@
 package org.devefx.serv.core;
 
 import org.devefx.serv.config.HandlerRegistry;
-import org.devefx.serv.net.ServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+@SuppressWarnings("rawtypes")
 public class MessageDispatcher extends Thread {
 
+	private static final Logger log = LoggerFactory.getLogger(MessageDispatcher.class);
+	
 	private Queue<MessageEvent> msgQueue = new ConcurrentLinkedDeque<MessageEvent>();
 
 	private HandlerRegistry registry;
@@ -42,7 +46,11 @@ public class MessageDispatcher extends Thread {
 				while ((msg = msgQueue.poll()) != null) {
 					MessageHandler handler = registry.getHandler(msg.getId());
 					if (handler != null) {
-						handler.onMessage(msg);
+						handler.onMessage(msg.getSender(), msg.getContent());
+					} else {
+						if (log.isInfoEnabled()) {
+							log.info(String.format("[id: %d] UNREGISTERED", msg.getId()));
+						}
 					}
 				}
 			}
