@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.devefx</groupId>
     <artifactId>serv-engine</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-Alpha</version>
     <name>ServerEngine</name>
     <description>基于Netty的服务器引擎框架</description>
     <url>https://github.com/devefx/serv-engine</url>
