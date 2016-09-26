@@ -1,9 +1,8 @@
 package org.devefx.serv.net;
 
-import org.devefx.serv.config.HandlerIdentifier;
+import org.devefx.serv.codec.BytesMessageDecoder;
 import org.devefx.serv.config.HandlerRegistry;
-
-import io.netty.buffer.ByteBuf;
+import org.devefx.serv.core.MessageDecoder;
 
 import java.io.Serializable;
 
@@ -14,7 +13,7 @@ public abstract class ServerConfig implements Serializable {
 	protected String host = "0.0.0.0";
 	protected int port = 81194;
 	protected HandlerRegistry registry;
-	protected HandlerIdentifier identifier;
+	protected MessageDecoder<?> decoder;
 	
 	public String getHost() {
 		return host;
@@ -40,21 +39,14 @@ public abstract class ServerConfig implements Serializable {
 		this.registry = registry;
 	}
 	
-	public HandlerIdentifier getIdentifier() {
-		if (identifier == null) {
-			identifier = new DefaultHandlerIdentifier();
+	public MessageDecoder<?> getDecoder() {
+		if (decoder == null) {
+			decoder = new BytesMessageDecoder();
 		}
-		return identifier;
-	}
-
-	public void setIdentifier(HandlerIdentifier identifier) {
-		this.identifier = identifier;
+		return decoder;
 	}
 	
-	class DefaultHandlerIdentifier implements HandlerIdentifier {
-		@Override
-		public Object checkId(ByteBuf buf) {
-			return buf.readShort();
-		}
+	public void setDecoder(MessageDecoder<?> decoder) {
+		this.decoder = decoder;
 	}
 }

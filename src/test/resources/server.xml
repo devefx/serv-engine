@@ -7,8 +7,6 @@
         http://code.devefx.org/schema/serv
         http://code.devefx.org/schema/serv/serv.xsd">
 
-	<bean id="identifier" class="org.devefx.handler.MyHandlerIdentifier"/>
-
 	<serv:registry id="registry">
 		<serv:handler class="org.devefx.handler.LoginHandler"/>
 		<serv:handler class="org.devefx.handler.MoveHandler"/>

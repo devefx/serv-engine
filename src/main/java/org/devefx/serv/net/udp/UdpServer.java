@@ -30,7 +30,7 @@ public class UdpServer extends ServerConfig implements InitializingBean {
 			b.group(group)
 			 .channel(NioDatagramChannel.class)
 			 .option(ChannelOption.SO_BROADCAST, true)
-			 .handler(new ServerHandler(getRegistry(), this.getIdentifier()));
+			 .handler(new ServerHandler(getRegistry(), this.getDecoder()));
 			
 			b.bind(host, port).addListener(new ChannelFutureListener() {
 				@Override

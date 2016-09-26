@@ -81,7 +81,7 @@ public class TcpServer extends ServerConfig implements InitializingBean {
 			// encoder
 			pipeline.addLast(new LengthFieldPrepender(2));
 			// business
-			pipeline.addLast(new ServerHandler(getRegistry(), getIdentifier()));
+			pipeline.addLast(new ServerHandler(getRegistry(), getDecoder()));
 		}
 	}
 }

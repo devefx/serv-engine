@@ -49,10 +49,9 @@ public class MessageDispatcher extends Thread {
 						handler.onMessage(msg.getSender(), msg.getContent());
 					} else {
 						if (log.isInfoEnabled()) {
-							log.info(String.format("[id: %d] UNREGISTERED", msg.getId()));
+							log.info("[id: " + msg.getId() + "] UNREGISTERED");
 						}
 					}
-					msg.getContent().release();
 				}
 			}
 		}

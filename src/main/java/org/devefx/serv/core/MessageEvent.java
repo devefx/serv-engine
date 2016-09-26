@@ -2,30 +2,28 @@ package org.devefx.serv.core;
 
 import org.devefx.serv.net.Sender;
 
-import io.netty.buffer.ByteBuf;
-
-public class MessageEvent {
+public class MessageEvent<T> {
 	
 	private final Object id;
+	private final T content;
 	private final Sender sender;
-	private final ByteBuf content;
 	
-	public MessageEvent(Object id, Sender sender, ByteBuf content) {
+	public MessageEvent(Object id, T content, Sender sender) {
 		this.id = id;
-		this.sender = sender;
 		this.content = content;
-		this.content.retain();
+		this.sender = sender;
 	}
 	
 	public Object getId() {
 		return id;
 	}
 	
+	public T getContent() {
+		return content;
+	}
+	
 	public Sender getSender() {
 		return sender;
 	}
-	
-	public ByteBuf getContent() {
-		return content;
-	}
+
 }

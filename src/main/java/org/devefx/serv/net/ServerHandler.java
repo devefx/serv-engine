@@ -1,9 +1,8 @@
 package org.devefx.serv.net;
 
-import org.devefx.serv.config.HandlerIdentifier;
 import org.devefx.serv.config.HandlerRegistry;
+import org.devefx.serv.core.MessageDecoder;
 import org.devefx.serv.core.MessageDispatcher;
-import org.devefx.serv.core.MessageEvent;
 import org.devefx.serv.net.tcp.TcpSender;
 import org.devefx.serv.net.udp.UdpSender;
 import org.slf4j.Logger;
@@ -20,12 +19,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 	
 	private MessageDispatcher dispatcher;
 	
-	private HandlerIdentifier identifier;
+	private MessageDecoder<?> decoder;
 	
-	public ServerHandler(HandlerRegistry registry, HandlerIdentifier identifier) {
+	public ServerHandler(HandlerRegistry registry, MessageDecoder<?> decoder) {
 		dispatcher = new MessageDispatcher(registry);
 		dispatcher.start();
-		this.identifier = identifier;
+		this.decoder = decoder;
 	}
 	
 	@Override
@@ -33,19 +32,11 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 			throws Exception {
 		if (msg instanceof DatagramPacket) {
 			DatagramPacket packet = (DatagramPacket) msg;
-			ByteBuf buf = (ByteBuf) packet.content();
-			Object msgId = identifier.checkId(buf);
-			
 			Sender sender = new UdpSender(ctx.channel(), packet.sender());
-			MessageEvent event = new MessageEvent(msgId, sender, buf);
-			dispatcher.push(event);
+			dispatcher.push(decoder.decode((ByteBuf) packet.content(), sender));
 		} else {
-			ByteBuf buf = (ByteBuf) msg;
-			Object msgId = identifier.checkId(buf);
-			
 			Sender sender = new TcpSender(ctx.channel());
-			MessageEvent event = new MessageEvent(msgId, sender, buf);
-			dispatcher.push(event);
+			dispatcher.push(decoder.decode((ByteBuf) msg, sender));
 		}
 	}
 	
@@ -57,6 +48,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
+		log.error("An error occurred:", cause);
 		ctx.close();
 	}
 }

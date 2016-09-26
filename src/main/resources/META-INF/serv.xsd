@@ -12,7 +12,7 @@
 		<xsd:attribute name="port" type="xsd:int" use="optional"/>
 		<xsd:attribute name="host" type="xsd:string" use="optional"/>
 		<xsd:attribute name="registry" type="xsd:IDREF" use="required"/>
-		<xsd:attribute name="identifier" type="xsd:string" use="optional"/>
+		<xsd:attribute name="decoder" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 	
 	<xsd:element name="handler">

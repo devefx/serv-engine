@@ -31,7 +31,7 @@ public class HandlerRegistry implements Serializable {
         }
         handlerMap.put(id, handler);
 		if (log.isInfoEnabled()) {
-			log.info(String.format("[id: %d] registerHandler: %s", handler.getId(), handler.getClass()));
+			log.info(String.format("[id: " + handler.getId() + "] registerHandler: %s", handler.getClass()));
 		}
     }
 
