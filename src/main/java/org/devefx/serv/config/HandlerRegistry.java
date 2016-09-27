@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,7 +21,13 @@ public class HandlerRegistry implements Serializable {
     public HandlerRegistry() {
 
     }
-
+    
+    public HandlerRegistry(List<MessageHandler> handlers) {
+    	for (MessageHandler handler : handlers) {
+			registerHandler(handler.getId(), handler);
+		}
+    }
+    
     public HandlerRegistry(HandlerRegistry registry) {
         this.handlerMap = registry.handlerMap;
     }

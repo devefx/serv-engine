@@ -1,15 +1,22 @@
 package org.devefx.serv.config.spring.schema;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
 import org.devefx.serv.config.HandlerRegistry;
-import org.devefx.serv.core.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -31,6 +38,11 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 	
+	private static final String ID_ATTRIBUTE = "id";
+	private static final String NAME_ATTRIBUTE = "name";
+	private static final String CLASS_ATTRIBUTE = "class";
+	private static final String SCAN_PACKAGE_ATTRIBUTE = "scan-package";
+	
 	private final Class<?> beanClass;
 	
 	private final boolean required;
@@ -45,9 +57,9 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 		beanDefinition.setBeanClass(beanClass);
 		beanDefinition.setLazyInit(false);
 		
-		String id = element.getAttribute("id");
+		String id = element.getAttribute(ID_ATTRIBUTE);
 		if ((id == null || id.isEmpty()) && required) {
-			String generatedBeanName = element.getAttribute("name");
+			String generatedBeanName = element.getAttribute(NAME_ATTRIBUTE);
 			if (generatedBeanName == null || generatedBeanName.length() == 0) {
 				generatedBeanName = beanClass.getName();
 			}
@@ -65,20 +77,21 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		if (beanClass.isAssignableFrom(HandlerRegistry.class)) {
-			HandlerRegistry registry = new HandlerRegistry();
-			String scanPackage = element.getAttribute("scan-package");
+			ManagedList<Object> list = new ManagedList<Object>();
+			
+			String scanPackage = element.getAttribute(SCAN_PACKAGE_ATTRIBUTE);
 			if (scanPackage != null && !scanPackage.isEmpty()) {
-				scanHandler(registry, scanPackage);
+				scanHandler(parserContext.getRegistry(), list, scanPackage);
 			}
 			NodeList nodes = element.getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
 				if (Node.ELEMENT_NODE == node.getNodeType()) {
-					String className = ((Element) node).getAttribute("class");
-					registerHandler(registry, className);
+					String className = ((Element) node).getAttribute(CLASS_ATTRIBUTE);
+					registerHandler(parserContext.getRegistry(), list, className);
 				}
 			}
-			beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(registry);
+			beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(list);
 		}
 		
 		for (Method setter : beanClass.getMethods()) {
@@ -119,7 +132,7 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
                 || cls == String.class || cls == Date.class || cls == Class.class;
     }
 
-	private static void scanHandler(HandlerRegistry registry, String packageName) {
+	private static void scanHandler(BeanDefinitionRegistry registry, ManagedList<Object> list, String packageName) {
 		String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + 
 				ClassUtils.convertClassNameToResourcePath(packageName) + "/" + DEFAULT_RESOURCE_PATTERN;
 		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -130,7 +143,7 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 				if (resource.isReadable()) {
 					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 					AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-					registerHandler(registry, metadata.getClassName());
+					registerHandler(registry, list, metadata.getClassName());
 				}
 			}
 		} catch (Exception e) {
@@ -139,19 +152,33 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
-	private static void registerHandler(HandlerRegistry registry, String className) {
+	private static void registerHandler(BeanDefinitionRegistry registry, ManagedList<Object> list, String className) {
+		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+		beanDefinition.setBeanClassName(className);
+		beanDefinition.setLazyInit(false);
+		
+		// auto inject bean
 		try {
+			MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
+			
 			Class<?> handlerClass = Class.forName(className);
-			if (!handlerClass.isAssignableFrom(MessageHandler.class)) {
-				// throw exception
+			for (Field field : handlerClass.getDeclaredFields()) {
+				boolean isQualifier = field.isAnnotationPresent(Qualifier.class);
+				if (isQualifier) {
+					String propertyName = field.getName();
+					String beanName = field.getAnnotation(Qualifier.class).value();
+					propertyValues.add(propertyName, new RuntimeBeanReference(beanName));
+				}
 			}
-			MessageHandler handler = (MessageHandler) handlerClass.newInstance();
-			registry.registerHandler(handler.getId(), handler);
+			
 		} catch (Exception e) {
 			log.error("An error occurred:", e);
 			e.printStackTrace();
 		}
+		
+		String beanName = BeanDefinitionReaderUtils.generateBeanName(
+				beanDefinition, registry, true);
+		list.add(new BeanDefinitionHolder(beanDefinition, beanName));
 	}
 
 }
