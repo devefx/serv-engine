@@ -143,7 +143,9 @@ public class ServBeanDefinitionParser implements BeanDefinitionParser {
 				if (resource.isReadable()) {
 					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 					AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-					registerHandler(registry, list, metadata.getClassName());
+					if (metadata.isIndependent()) {
+						registerHandler(registry, list, metadata.getClassName());
+					}
 				}
 			}
 		} catch (Exception e) {
